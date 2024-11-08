@@ -1,10 +1,8 @@
 import { AutojoinRoomsMixin, MatrixAuth, MatrixClient } from "matrix-bot-sdk";
-import OpenAI from 'openai';
 
 import { VerifiedAccounts } from "../backend/VerifiedAccounts";
 import {
   MATRIX_BOT_HOME_SERVER_URL,
-  OPENAI_API_KEY
 } from "../config";
 import {
   getRoomMetadata,

@@ -1,5 +1,5 @@
 # Builder
-FROM --platform=$BUILDPLATFORM node:20-bullseye as builder
+FROM --platform=$BUILDPLATFORM node:20-bullseye AS builder
 
 WORKDIR /src
 

@@ -1,11 +1,11 @@
 {
-  "name": "defi-bot",
+  "name": "superhero-finance-bot",
   "version": "0.1.0",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx tsx --watch ./src/index.ts",
-    "dev": "npx tsx --watch ./src/index.ts",
+    "start": "npx tsx ./src/index.ts",
+    "dev": "npx tsx --watch --trace-warnings ./src/index.ts",
     "prettier": "prettier . --check",
     "lint": "tsc --noEmit -p . && npm run prettier",
     "build": "tsc --build",
@@ -30,6 +30,7 @@
     "openai": "^4.71.0",
     "showdown": "^2.1.0",
     "superhero-bot-contracts": "git+ssh://git@github.com/superhero-com/superhero-bot-contracts#main",
+    "tsx": "^4.19.2",
     "typescript": "^5.2.2",
     "uuid": "^9.0.1"
   },

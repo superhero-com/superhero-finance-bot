@@ -5,7 +5,7 @@ import { PROTOCOL_AETERNITY } from "../../constants";
 import { IRoomMetadata } from "../../libs/RoomCache";
 import { IChatEvent } from "../../types";
 import { BaseBotOptions, BotCommand } from "../@base";
-import { OpenAIAssistantBot } from "../@base/OpenAiAssistantBot";
+import { OpenAIAssistantBot } from "../@base/OpenAIAssistantBot";
 import { initRouter } from "./callbackRouter";
 import { CheckWalletBalanceCommand } from "./WalletCommands/CheckWalletBalanceCommand";
 import { ConnectWalletCommand } from "./WalletCommands/ConnectWalletCommand";

@@ -34,7 +34,7 @@ export abstract class OpenAIAssistantBot extends BaseBot {
           description: command.description,
           parameters: {
             type: 'object',
-            properties: command.getArguments().reduce((acc, arg) => {
+            properties: command.getArguments().reduce((acc: { [key: string]: any }, arg) => {
               acc[arg.name] = {
                 type: 'string',
                 description: arg.description,
@@ -81,10 +81,10 @@ export abstract class OpenAIAssistantBot extends BaseBot {
   }
 
   async onMessage(
-    sender: ISender, 
-    message: IMessage, 
+    sender: ISender,
+    message: IMessage,
     onReply = (reply: string) => reply,
-    onTyping = (isTyping: boolean) => {},
+    onTyping = (isTyping: boolean) => { },
   ): Promise<string | null> {
     const senderWalletAddress = VerifiedAccounts.getVerifiedAccountOrUndefined(
       sender.id.toString(),
@@ -124,8 +124,10 @@ export abstract class OpenAIAssistantBot extends BaseBot {
       );
       for (const reply of messages.data.reverse()) {
         console.log('AI REPLU::', JSON.stringify(reply, null, 2))
-        console.log(`${reply.role} > ${reply.content[0].text.value}`);
-        onReply(this.markdownConverter.makeHtml(reply.content[0].text.value));
+        if ('text' in reply.content[0]) {
+          console.log(`${reply.role} > ${reply.content[0].text.value}`);
+          onReply(this.markdownConverter.makeHtml(reply.content[0].text.value));
+        }
         break;
       }
     } else if (run.status === 'requires_action' && run.required_action) {
