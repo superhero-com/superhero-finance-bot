@@ -113,6 +113,6 @@ jobs:
               -e OPENAI_API_KEY \
               -e BOT_ASSISTANT_ID \
               --network "${{ inputs.CONTAINER_NAME }}-redis" \
-              --network "host" \
+              --network "traefik" \
               -v "${{ secrets.HOST_DATA_DIR }}/data":"/data" \
               "superherodotcom/superhero-finance-bot:${{ inputs.VERSION }}"
