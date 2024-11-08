@@ -1,0 +1,118 @@
+# This workflow is only for inclusion in other workflows.
+name: Deploy via ssh
+on:
+  workflow_call:
+    inputs:
+      VERSION:
+        description: "Version to deploy"
+        required: false
+        default: "main"
+        type: string
+      CONTAINER_NAME:
+        description: "Container name"
+        default: "superhero-finance-bot"
+        required: false
+        type: string
+    secrets:
+      DEPLOY_HOST:
+        description: "Host to deploy to"
+        required: true
+      DEPLOY_USERNAME:
+        description: "Username to use for ssh"
+        required: true
+      DEPLOY_KEY:
+        description: "SSH key to use for ssh"
+        required: true
+      HOST_DATA_DIR:
+        description: "Host directory to persist /data in"
+        required: true
+      REDIS_URL:
+        description: "Redis url to use for caching"
+        required: true
+      ACTIVE_NETWORK:
+        description: "AE Network ID to run on"
+        required: true
+      BOT_HOST_PORT:
+        description: "Host port to map for callback"
+        required: true
+      MATRIX_WALLET_BOT_USERNAME:
+        description: "Matrix username for wallet bot"
+        required: true
+      MATRIX_WALLET_BOT_PASSWORD:
+        description: "Matrix password for wallet bot"
+        required: true
+      MATRIX_HOME_SERVER_DOMAIN:
+        description: "Matrix homeserver domain"
+        required: true
+      MATRIX_BOT_HOME_SERVER_URL:
+        description: "Matrix homeserver url"
+        required: true
+      BACKEND_CALLBACK_BASE_URL:
+        description: "Backend callback base url"
+        required: true
+      OPENAI_API_KEY:
+        description: "OpenAI API key"
+        required: true
+      BOT_ASSISTANT_ID:
+        description: "OpenAI assistant id"
+        required: true
+jobs:
+  deploy:
+    name: Deploy via ssh
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run deploy script
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          ACTIVE_NETWORK: "${{ secrets.ACTIVE_NETWORK }}"
+          MATRIX_BOT_HOME_SERVER_URL: "${{ secrets.MATRIX_BOT_HOME_SERVER_URL }}"
+          MATRIX_HOME_SERVER_DOMAIN: "${{ secrets.MATRIX_HOME_SERVER_DOMAIN }}"
+          MATRIX_WALLET_BOT_USERNAME: "${{ secrets.MATRIX_WALLET_BOT_USERNAME }}"
+          MATRIX_WALLET_BOT_PASSWORD: "${{ secrets.MATRIX_WALLET_BOT_PASSWORD }}"
+          BOT_STORAGE_FILE: "/data/storage.json"
+          BOT_ENCRYPTION_DIR: "/data/encryption"
+          BACKEND_CALLBACK_BASE_URL: "${{ secrets.BACKEND_CALLBACK_BASE_URL }}"
+          REDIS_URL: "${{ inputs.CONTAINER_NAME }}-redis:6379"
+          OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
+          BOT_ASSISTANT_ID: "${{ secrets.BOT_ASSISTANT_ID }}"
+          SHA: "${{ github.sha }}"
+        with:
+          host: "${{ secrets.DEPLOY_HOST }}"
+          username: "${{ secrets.DEPLOY_USERNAME }}"
+          key: "${{ secrets.DEPLOY_KEY }}"
+          envs: >
+            MATRIX_BOT_HOME_SERVER_URL,
+            MATRIX_HOME_SERVER_DOMAIN,
+            MATRIX_WALLET_BOT_USERNAME,
+            MATRIX_WALLET_BOT_PASSWORD,
+            BOT_STORAGE_FILE,
+            BOT_ENCRYPTION_DIR,
+            ACTIVE_NETWORK,
+            BACKEND_CALLBACK_BASE_URL,
+            REDIS_URL,
+            OPENAI_API_KEY,
+            BOT_ASSISTANT_ID,
+            SHA
+          script: |
+            echo $SHA > "${{ secrets.HOST_DATA_DIR }}/REVISION" || true
+            docker pull "superherodotcom/superhero-finance-bot:${{ inputs.VERSION }}" || true
+            docker stop "${{ inputs.CONTAINER_NAME }}" || true
+            docker rm "${{ inputs.CONTAINER_NAME }}" || true
+            docker run -d --restart=always --name "${{ inputs.CONTAINER_NAME }}" \
+              -l autoheal=true \
+              -p "${{ secrets.BOT_HOST_PORT }}":3000 \
+              -e ACTIVE_NETWORK \
+              -e MATRIX_BOT_HOME_SERVER_URL \
+              -e MATRIX_HOME_SERVER_DOMAIN \
+              -e MATRIX_WALLET_BOT_USERNAME \
+              -e MATRIX_WALLET_BOT_PASSWORD \
+              -e BOT_STORAGE_FILE \
+              -e BOT_ENCRYPTION_DIR \
+              -e BACKEND_CALLBACK_BASE_URL \
+              -e REDIS_URL \
+              -e OPENAI_API_KEY \
+              -e BOT_ASSISTANT_ID \
+              --network "${{ inputs.CONTAINER_NAME }}-redis" \
+              --network "host" \
+              -v "${{ secrets.HOST_DATA_DIR }}/data":"/data" \
+              "superherodotcom/superhero-finance-bot:${{ inputs.VERSION }}"

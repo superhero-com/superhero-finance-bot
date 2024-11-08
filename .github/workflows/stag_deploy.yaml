@@ -1,0 +1,48 @@
+name: Staging deploy
+on:
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: "Version to deploy to staging"
+        default: "main"
+        required: false
+        type: string
+      CONTAINER_NAME:
+        description: "Container name"
+        default: "superhero-finance-bot"
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      VERSION:
+        description: "Version to deploy to staging"
+        default: "main"
+        required: false
+        type: string
+      CONTAINER_NAME:
+        description: "Container name"
+        default: "superhero-finance-bot"
+        required: false
+        type: string
+jobs:
+  call_deploy:
+    name: Deploy via ssh (staging)
+    uses: ./.github/workflows/ssh_deploy.yaml
+    with:
+      VERSION: ${{ inputs.VERSION }}
+      CONTAINER_NAME: ${{ inputs.CONTAINER_NAME }}
+    secrets:
+      ACTIVE_NETWORK: "${{ secrets.ACTIVE_NETWORK }}"
+      BOT_HOST_PORT: "3080"
+      DEPLOY_HOST: "${{ secrets.DEPLOY_HOST }}"
+      DEPLOY_USERNAME: "${{ secrets.DEPLOY_USERNAME }}"
+      DEPLOY_KEY: "${{ secrets.DEPLOY_KEY }}"
+      HOST_DATA_DIR: "${{ secrets.HOST_DATA_DIR }}"
+      MATRIX_WALLET_BOT_USERNAME: "${{ secrets.MATRIX_WALLET_BOT_USERNAME }}"
+      MATRIX_WALLET_BOT_PASSWORD: "${{ secrets.MATRIX_WALLET_BOT_PASSWORD }}"
+      MATRIX_HOME_SERVER_DOMAIN: ${{ secrets.MATRIX_DOMAIN }}
+      MATRIX_BOT_HOME_SERVER_URL: "https://${{ secrets.MATRIX_DOMAIN }}"
+      BACKEND_CALLBACK_BASE_URL: "https://matrix.${{ secrets.MATRIX_DOMAIN }}/callback"
+      REDIS_URL: "redis://${{ inputs.CONTAINER_NAME }}-redis:6379"
+      OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
+      BOT_ASSISTANT_ID: "${{ secrets.BOT_ASSISTANT_ID }}"
